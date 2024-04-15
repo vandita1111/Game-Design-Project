@@ -1,0 +1,110 @@
+﻿Idea: Flappy bird but with a laptop instead
+Spacebar/ mouse clicks to flap 
+there are letters on the screen and you have to type them to get all they keys
+HOW TO MAKE IT SO IT RECORDS VERSION HISTORY ???
+
+
+What I need for just a game:
+* Import java.swing/awts 
+* Make public game window (extends JPanel, implements action listener, keyListener) –private
+   * Give width, height– final
+   * Bird size –final
+   * Pipe width, gap, speed– final
+   * Gravity??-- final
+   * Bird y coordinate
+   * Bird velocity
+   * Array of rectangles (pipes)
+   * Score
+   * Gameover (boolean)
+   * Timer
+   * Current letter
+   * set<chareacter> letters
+   * Boolean game started
+
+
+* Public Method for game
+   * Set size ??
+   * Set background (color.Brown) **brown for desk??
+   * setFocusable(true) **he did this in his example
+   * addKeyListener(this)
+   * Bird y coordinate = height of window /2 
+   * Bird velocity = ??
+   * pipes= new array list of rects
+   * Set score to 0
+   * gameOver = false
+   * currentLetter= 
+   * letters= new set includes abcdefghijklmnopqrstuvwxyz
+   * New timer (?? ,this) 
+   * Start timer
+   * Method to generate pipe
+   * Method to generate letters
+* Public method to generate letters
+   * Current letter= getrandom letter method
+* Public get random method
+   * Arraylist of characters is the remaining letters in the array of letters
+   * Shuffle so random
+   * Return a letter
+* Public method to generate random pipes 
+   * Pipe x value= wdith/4 <- HAVE THE DIVIDOR INCREASE AS LEVELS INCREASE
+   * Gap position = random int (must be within height: height- pipe gap)
+   * Top pipe = new rectangle (pipe, 0 , width, position)
+   * bottom= new rect( pipe, gaap position+pipe gap, height, - gap pos-pipe gap)
+   * Add top pipe
+   * Add bottom pipe
+* Method to move pipes
+   * For every pipe in pipes
+      * Set the location
+      * If the pipe is less than coordinate 0 remove pipes
+* Method for bird to jump
+   * velocity= -??
+   * gameStart = true (start game when player presses space key
+   * timer.start() (start timer)
+* Method to update bird position
+   * Bird y coord += velocity of bird
+   * Bird velocity is affected by gravity (bbird velocity =+ gravity)
+   * If y coordinate of bird is out of frame (<0 or y coordinate+ bird size >height of frame)         
+      * game over =true
+      * PICTURE OF BIRD CHANGES
+   * COLLISION
+   * For piped in pipe 
+      * If the pipe interests  (new rect(width/2 - birdsize / 2 , bird y cood, bird size, bird size)
+         * Game over= true
+         * PICTURE OF BIRD CHANGES
+* GRAPHICS (OVERIDE)
+* paintCompontent(graphics g)
+   * super.paintComponent(g)
+   * FIGURE OUT HOW TO LOAD IN FILE FOR BIRD
+      * If number of correct letters is 24 update image
+      * If game over update image
+      * If bird flaps update image
+   * g.setColor(color.blue
+   * g.fillRect (width/ 2 - birdsize/ 2, bird y coord, bird size, bird size)
+   * G.set color (red)
+   * For pipes in pipe
+      * g.fillrect(pipe, pipe, pipe width, pipe height)
+   * Gset color (black)
+   * Set font ariel bold size 
+   * Drawstring (score:” +(score+ count correct letters()), coordinates
+   * Set font ariel bold size
+   * Drawstring current letter, coordinate
+   * If game is over print game over
+* When action performed
+   * If game is not over and it has been started
+      * Move the pipes and update the bird methos
+      * Repaint
+* When key is typed 
+* When key is pressed
+   * If character == current letter and the game is still happening generate new letter
+   * If space is pressed jump()
+   * Restart game?
+* Key release
+* Restart game method (reset all valiables
+* Method to count number of correct letters
+* Main method 
+   * Jframe frame = new Jframe flappy bird game
+   * Flappy bird game game = new game
+   * frame.add(game)
+   * Frame.pack
+   * Frame.setdefault close opp (exit on close)
+   * Set location relative to
+   * Set visible
