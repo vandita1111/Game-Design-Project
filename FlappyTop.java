@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,12 +28,12 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
     private static final int PIPE_GAP = 250;
     private static final int PIPE_SPEED = 5;
     private static final int GRAVITY = 1;
-    private BufferedImage birdImageOpen;
-    private BufferedImage birdImageClosed;
+    //images
     private BufferedImage birdImageOpenKeyless;
     private BufferedImage birdImageClosedKeyless;
     private BufferedImage backgroundImage;
-
+    private BufferedImage winImage;
+    //non final variables
     private int birdY;
     private int birdVelocity;
     private ArrayList<Rectangle> pipes;
@@ -45,22 +44,21 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
     private Set<Character> letters;
     private boolean gameStarted;
 	private boolean spaceKeyPressed;
+	private boolean gameWon;
 	private ArrayList<Character> remainingLetters;
     
     //methods/ constructor
     public FlappyTop() {
     	//load images
     	try {
-    		birdImageOpen = ImageIO.read( new File("/Users/vanditasoni/Downloads/openflap.png"));
-    		birdImageClosed = ImageIO.read( new File("/Users/vanditasoni/Downloads/closedflap.png"));
     		birdImageClosedKeyless = ImageIO.read( new File("/Users/vanditasoni/Downloads/closednokeys.png"));
     		birdImageOpenKeyless = ImageIO.read( new File("/Users/vanditasoni/Downloads/openflapnokeys.png"));
     		backgroundImage = ImageIO.read( new File("/Users/vanditasoni/Downloads/background.jpg"));
+    		winImage = ImageIO.read(new File("/Users/vanditasoni/Downloads/winner.png"));
     	}catch (IOException e) {
     		e.printStackTrace();
     	}
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
-       // setBackground(Color.CYAN); //change to desk color/ image 
         setFocusable(true);
         addKeyListener(this);
 
@@ -74,6 +72,7 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
         timer = new Timer(20, this);
 
         letters = new HashSet<>();
+//        letters.add('A'); //test case
         for (char c = 'A'; c <= 'Z'; c++) {
             letters.add(c);
         }
@@ -123,12 +122,20 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
         if (birdY < 0 || birdY + BIRD_SIZE > HEIGHT) {
             gameOver = true;
         }
-
+        
+        //collision
         for (Rectangle pipe : pipes) {
-            if (pipe.intersects(new Rectangle(WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE))) {
+            if (pipe.intersects(new Rectangle(WIDTH / 2 - BIRD_SIZE -1 / 2, birdY, BIRD_SIZE, BIRD_SIZE))) {
                 gameOver = true;
             }
         }
+    }
+    
+    private void checkForWin() {
+    	if(remainingLetters.size()== 0) {
+    		gameWon= true;
+    		timer.stop();
+    	}
     }
     
     //interface stuff
@@ -136,46 +143,41 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         
-        //background
-        g.drawImage(backgroundImage, 0, 0, WIDTH, HEIGHT, null);
-        
-        //bird depending on key state
-//        g.setColor(Color.GREEN);
-//        g.fillRect(WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE);
-//        
-        if (spaceKeyPressed && remainingLetters.size() == 0) {
-            g.drawImage(birdImageClosed, WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE, null);
-        } 
-        if (!spaceKeyPressed && remainingLetters.size() == 0){
-            g.drawImage(birdImageOpen, WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE, null);
-        }
-        if (spaceKeyPressed && remainingLetters.size() > 0){
-            g.drawImage(birdImageOpenKeyless, WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE, null);
-        }
-        if (!spaceKeyPressed && remainingLetters.size() > 0){
-            g.drawImage(birdImageClosedKeyless, WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE, null);
-        }
-        
-        //pipes
-        g.setColor(Color.CYAN);
-        for (Rectangle pipe : pipes) {
-            g.fillRect(pipe.x, pipe.y, pipe.width, pipe.height);
-        }
-
-        g.setColor(Color.BLACK);
-        g.setFont(new Font("Arial", Font.BOLD, 30));
-        g.drawString("Score: " + (score), 20, 40); // Adjusted to include letters in score
-
-        g.setFont(new Font("Arial", Font.BOLD, 50));
-        g.drawString(String.valueOf(currentLetter), WIDTH - 100, 50); // Display current letter
-
-        if (gameOver) {
-            g.setFont(new Font("Arial", Font.BOLD, 50));
-            g.drawString("Game Over", WIDTH / 2 - 150, HEIGHT / 2);
-        }
-        if (!gameOver && !gameStarted) {
-            g.setFont(new Font("Arial", Font.BOLD, 50));
-            g.drawString("Press Space to Start", WIDTH / 5, HEIGHT / 2 - 50);
+        if (gameWon) {
+        	g.drawImage(winImage, 0, 0, WIDTH, HEIGHT, null);
+        	g.setFont(new Font("Arial", Font.BOLD, 45));
+        	g.drawString("Final Score: " + (score), 20, 40);
+        } else {
+	        //background
+	        g.drawImage(backgroundImage, 0, 0, WIDTH, HEIGHT, null);
+	        if (spaceKeyPressed && remainingLetters.size() > 0){
+	            g.drawImage(birdImageOpenKeyless, WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE, null);
+	        }
+	        if (!spaceKeyPressed && remainingLetters.size() > 0){
+	            g.drawImage(birdImageClosedKeyless, WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE, null);
+	        }
+	        
+	        //pipes
+	        g.setColor(Color.CYAN);
+	        for (Rectangle pipe : pipes) {
+	            g.fillRect(pipe.x, pipe.y, pipe.width, pipe.height);
+	        }
+	
+	        g.setColor(Color.BLACK);
+	        g.setFont(new Font("Arial", Font.BOLD, 30));
+	        g.drawString("Score: " + (score), 20, 40);
+	
+	        g.setFont(new Font("Arial", Font.BOLD, 50));
+	        g.drawString(String.valueOf(currentLetter), WIDTH - 100, 50); // Display current letter
+	
+	        if (gameOver) {
+	            g.setFont(new Font("Arial", Font.BOLD, 50));
+	            g.drawString("Game Over", WIDTH / 2 - 150, HEIGHT / 2);
+	        }
+	        if (!gameOver && !gameStarted) {
+	            g.setFont(new Font("Arial", Font.BOLD, 50));
+	            g.drawString("Press Space to Start", WIDTH / 5, HEIGHT / 2 - 50);
+	        }
         }
     }
 
@@ -184,6 +186,7 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
         if (!gameOver && gameStarted) {
             movePipes();
             updateBird();
+            checkForWin();
         }
         repaint();
     }
@@ -224,9 +227,7 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
         timer.stop();
         generatePipe();
         generateLetter();
-    }
-    
-    	
+    }	
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("FlappyTop");
