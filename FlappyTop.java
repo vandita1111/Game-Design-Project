@@ -5,11 +5,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
@@ -19,11 +24,16 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
 	//set variables
     private static final int WIDTH = 800;
     private static final int HEIGHT = 600;
-    private static final int BIRD_SIZE = 30;
-    private static final int PIPE_WIDTH = 50;
-    private static final int PIPE_GAP = 200;
+    private static final int BIRD_SIZE = 120;
+    private static final int PIPE_WIDTH = 100;
+    private static final int PIPE_GAP = 250;
     private static final int PIPE_SPEED = 5;
     private static final int GRAVITY = 1;
+    private BufferedImage birdImageOpen;
+    private BufferedImage birdImageClosed;
+    private BufferedImage birdImageOpenKeyless;
+    private BufferedImage birdImageClosedKeyless;
+    private BufferedImage backgroundImage;
 
     private int birdY;
     private int birdVelocity;
@@ -34,11 +44,23 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
     private char currentLetter;
     private Set<Character> letters;
     private boolean gameStarted;
+	private boolean spaceKeyPressed;
+	private ArrayList<Character> remainingLetters;
     
-    //methods
+    //methods/ constructor
     public FlappyTop() {
+    	//load images
+    	try {
+    		birdImageOpen = ImageIO.read( new File("/Users/vanditasoni/Downloads/openflap.png"));
+    		birdImageClosed = ImageIO.read( new File("/Users/vanditasoni/Downloads/closedflap.png"));
+    		birdImageClosedKeyless = ImageIO.read( new File("/Users/vanditasoni/Downloads/closednokeys.png"));
+    		birdImageOpenKeyless = ImageIO.read( new File("/Users/vanditasoni/Downloads/openflapnokeys.png"));
+    		backgroundImage = ImageIO.read( new File("/Users/vanditasoni/Downloads/background.jpg"));
+    	}catch (IOException e) {
+    		e.printStackTrace();
+    	}
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        setBackground(Color.CYAN); //change to desk color/ image 
+       // setBackground(Color.CYAN); //change to desk color/ image 
         setFocusable(true);
         addKeyListener(this);
 
@@ -82,7 +104,7 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
     }
 
     public void generateLetter() {
-        ArrayList<Character> remainingLetters = new ArrayList<>(letters);
+        remainingLetters = new ArrayList<>(letters);
         remainingLetters.remove(Character.valueOf(currentLetter)); // Remove the current letter
         currentLetter = remainingLetters.get(new Random().nextInt(remainingLetters.size())); // Select a new letter randomly
     }
@@ -113,18 +135,36 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        g.setColor(Color.GREEN);
-        g.fillRect(WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE);
-
-        g.setColor(Color.RED);
+        
+        //background
+        g.drawImage(backgroundImage, 0, 0, WIDTH, HEIGHT, null);
+        
+        //bird depending on key state
+//        g.setColor(Color.GREEN);
+//        g.fillRect(WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE);
+//        
+        if (spaceKeyPressed && remainingLetters.size() == 0) {
+            g.drawImage(birdImageClosed, WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE, null);
+        } 
+        if (!spaceKeyPressed && remainingLetters.size() == 0){
+            g.drawImage(birdImageOpen, WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE, null);
+        }
+        if (spaceKeyPressed && remainingLetters.size() > 0){
+            g.drawImage(birdImageOpenKeyless, WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE, null);
+        }
+        if (!spaceKeyPressed && remainingLetters.size() > 0){
+            g.drawImage(birdImageClosedKeyless, WIDTH / 2 - BIRD_SIZE / 2, birdY, BIRD_SIZE, BIRD_SIZE, null);
+        }
+        
+        //pipes
+        g.setColor(Color.CYAN);
         for (Rectangle pipe : pipes) {
             g.fillRect(pipe.x, pipe.y, pipe.width, pipe.height);
         }
 
         g.setColor(Color.BLACK);
         g.setFont(new Font("Arial", Font.BOLD, 30));
-        g.drawString("Score: " + (score + countCorrectLetters()), 20, 40); // Adjusted to include letters in score
+        g.drawString("Score: " + (score), 20, 40); // Adjusted to include letters in score
 
         g.setFont(new Font("Arial", Font.BOLD, 50));
         g.drawString(String.valueOf(currentLetter), WIDTH - 100, 50); // Display current letter
@@ -156,6 +196,7 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             jump();
+            spaceKeyPressed = true;
         }
         if (Character.toUpperCase(e.getKeyChar()) == currentLetter && !gameOver && gameStarted) {
             generateLetter();
@@ -168,6 +209,9 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
+    	if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            spaceKeyPressed = false;
+        }
     }
 
     public void restartGame() {
@@ -181,11 +225,8 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
         generatePipe();
         generateLetter();
     }
-
-    public int countCorrectLetters() {
-        // Count the number of letters correctly clicked by the user (should be added to score)
-        return 0;
-    }
+    
+    	
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("FlappyTop");
