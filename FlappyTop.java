@@ -70,14 +70,14 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
         gameStarted = false;
 
         timer = new Timer(20, this);
-
         letters = new HashSet<>();
-//        letters.add('A'); //test case
+        //letters.add('A'); //test case
         for (char c = 'A'; c <= 'Z'; c++) {
             letters.add(c);
         }
 
         generatePipe();
+        remainingLetters = new ArrayList<>(letters);
         generateLetter();
     }
 
@@ -102,14 +102,22 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
         }
     }
 
+//    public void generateLetter() {
+//        remainingLetters = new ArrayList<>(letters);
+//        remainingLetters.remove(Character.valueOf(currentLetter)); // Remove the current letter
+//        currentLetter = remainingLetters.get(new Random().nextInt(remainingLetters.size())); // Select a new letter randomly
+//    }
     public void generateLetter() {
-        remainingLetters = new ArrayList<>(letters);
-        remainingLetters.remove(Character.valueOf(currentLetter)); // Remove the current letter
+    	if (remainingLetters.isEmpty()) {
+    		gameWon = true;
+    	    return;
+    	    }
+    	remainingLetters.remove(Character.valueOf(currentLetter)); // Remove the current letter
         currentLetter = remainingLetters.get(new Random().nextInt(remainingLetters.size())); // Select a new letter randomly
     }
 
     public void jump() {
-        birdVelocity = -15;
+        birdVelocity = -12;
         gameStarted = true; // Start the game when the player jumps
         timer.start(); // Start the timer when the player jumps
     }
@@ -125,7 +133,7 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
         
         //collision
         for (Rectangle pipe : pipes) {
-            if (pipe.intersects(new Rectangle(WIDTH / 2 - BIRD_SIZE -1 / 2, birdY, BIRD_SIZE, BIRD_SIZE))) {
+            if (pipe.intersects(new Rectangle(WIDTH / 2 - BIRD_SIZE/ 2, birdY, BIRD_SIZE, BIRD_SIZE))) {
                 gameOver = true;
             }
         }
@@ -158,7 +166,7 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
 	        }
 	        
 	        //pipes
-	        g.setColor(Color.CYAN);
+	        g.setColor(Color.BLUE);
 	        for (Rectangle pipe : pipes) {
 	            g.fillRect(pipe.x, pipe.y, pipe.width, pipe.height);
 	        }
@@ -177,6 +185,9 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
 	        if (!gameOver && !gameStarted) {
 	            g.setFont(new Font("Arial", Font.BOLD, 50));
 	            g.drawString("Press Space to Start", WIDTH / 5, HEIGHT / 2 - 50);
+	            g.setFont(new Font("Arial", Font.BOLD, 20));
+	            g.drawString("Get all the letters to complete your keyboard", WIDTH / 23, HEIGHT -50);
+	            g.drawString("The lower your score the better", WIDTH / 23, HEIGHT -20);
 	        }
         }
     }
@@ -200,23 +211,26 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             jump();
             spaceKeyPressed = true;
-        }
-        if (Character.toUpperCase(e.getKeyChar()) == currentLetter && !gameOver && gameStarted) {
-            generateLetter();
-        }
-        if (e.getKeyCode() == KeyEvent.VK_ENTER && gameOver) {
-            restartGame();
+        } else {
+        	char pressedKey = Character.toUpperCase(e.getKeyChar());
+        	if (Character.toUpperCase(e.getKeyChar()) == currentLetter && !gameOver && gameStarted) {
+        		generateLetter();
+        	} else if (Character.toUpperCase(e.getKeyChar()) != currentLetter && !gameOver && gameStarted) {
+        		gameOver = true;
+        	}
+        	if (e.getKeyCode() == KeyEvent.VK_ENTER && gameOver) {
+        		restartGame();
+        	}
         }
     }
-
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
     	if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             spaceKeyPressed = false;
         }
     }
-
+    //reset everything 
     public void restartGame() {
         birdY = HEIGHT / 2;
         birdVelocity = 0;
