@@ -72,8 +72,8 @@ public class FlappyTop extends JPanel implements ActionListener, KeyListener {
         timer = new Timer(20, this);
         letters = new HashSet<>();
         //letters.add('A'); //test case
-        for (char c = 'A'; c <= 'Z'; c++) {
-            letters.add(c);
+       for (char c = 'A'; c <= 'Z'; c++) {
+           letters.add(c);
         }
 
         generatePipe();
